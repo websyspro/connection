@@ -93,31 +93,37 @@ class Database
 		string|null $typeof = null,
 		Collection|array $fetchAll = [],
 	): Collection|array {
-    static::connect();
+		try {
+			static::connect();
 
-		if( isset( static::$statements[ $sql ]) === false ) {
-			static::$statements[ $sql ] = static::$handle->prepare( $sql );
-		}
+			if( isset( static::$statements[ $sql ]) === false ) {
+				static::$statements[ $sql ] = static::$handle->prepare( $sql );
+			}
 
-		$statements = static::$statements[ $sql ];
-		if( $statements instanceof PDOStatement ){
-			if( $statements->execute( $params )){
-				$fetchAll = $statements->fetchAll(
-					$typeof !== NULL 
-						? PDO::FETCH_ASSOC
-						: PDO::FETCH_OBJ
+			$statements = static::$statements[ $sql ];
+			if( $statements instanceof PDOStatement ){
+				if( $statements->execute( $params )){
+					$fetchAll = $statements->fetchAll(
+						$typeof !== NULL 
+							? PDO::FETCH_ASSOC
+							: PDO::FETCH_OBJ
+					);
+				}
+			}
+			
+			if( $typeof !== null ){
+				$fetchAll = Collection::create( $fetchAll )->mapper(
+					fn( array $row ) => new $typeof( ...$row )
 				);
 			}
+			
+			$statements->closeCursor();
+			return $fetchAll;
+		} catch( PDOException $pdoException ){
+			
 		}
-		
-		if( $typeof !== null ){
-			$fetchAll = Collection::create( $fetchAll )->mapper(
-				fn( array $row ) => new $typeof( ...$row )
-			);
-		}
-		
-		$statements->closeCursor();
-		return $fetchAll;
+
+		return [];
   }
 
 	public static function execute(
@@ -125,19 +131,25 @@ class Database
 		array $params = [],
 		int $rowCount = 0
 	): int {
-		static::connect();
+		try {
+			static::connect();
+	
+			if( isset( static::$statements[$sql]) === false ){
+				static::$statements[ $sql ] = static::$handle->prepare( $sql );
+			}
+	
+			$statements = static::$statements[$sql];
+			if( $statements->execute( $params )){
+				$rowCount = $statements->rowCount();
+			}
+			
+			$statements->closeCursor();
+			return $rowCount;
+		} catch( PDOException $pdoException ){
 
-		if( isset(static::$statements[$sql]) === false ){
-			static::$statements[ $sql ] = static::$handle->prepare( $sql );
 		}
 
-		$statements = static::$statements[$sql];
-		if( $statements->execute( $params )){
-			$rowCount = $statements->rowCount();
-		}
-		
-		$statements->closeCursor();
-		return $rowCount;
+		return 0;
 	}
 
 	public static function lastInsertId(
