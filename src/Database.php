@@ -10,7 +10,7 @@ use PDO;
 use function sprintf;
 use function defined;
 
-class Connection
+class Database
 {
 	private static PDO $handle;
 	private static array $statements = [];
