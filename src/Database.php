@@ -7,8 +7,10 @@ use Websyspro\Utils\Collection;
 use PDOException;
 use PDOStatement;
 use PDO;
+
 use function sprintf;
 use function defined;
+use function sizeof;
 
 class Database
 {
@@ -115,6 +117,10 @@ class Database
 				$fetchAll = Collection::create( $fetchAll )->mapper(
 					fn( array $row ) => new $typeof( ...$row )
 				);
+			}
+
+			if( sizeof( static::$statements ) >= 2056 ){
+				static::$statements = [];
 			}
 			
 			$statements->closeCursor();
