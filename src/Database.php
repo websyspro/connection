@@ -23,17 +23,23 @@ class Database
 			return static::$handle;
 		}
 
-		static::$handle = new PDO(
-			match( CONNECT_DETAILS->driver ){
-				DriverType::PostgreSQL => self::getPostgresSQL(),
-				DriverType::SqlServer => self::getSqlServer(),
-				DriverType::Sqlite => self::getSqlLite(),
-				DriverType::MySql => self::getMySQL(),
-					default => self::getPdoException(),
-			},
-			CONNECT_DETAILS->user,
-			CONNECT_DETAILS->pass, self::getPdoOptions()
-		);
+		if( CONNECT_DETAILS->driver !== DriverType::Sqlite ){
+			static::$handle = new PDO(
+				self::getSqlite()
+			);
+		} else {
+			static::$handle = new PDO(
+				match( CONNECT_DETAILS->driver ){
+					DriverType::PostgreSQL => self::getPostgresSQL(),
+					DriverType::SqlServer => self::getSqlServer(),
+					DriverType::MySql => self::getMySQL(),
+						default => self::getPdoException(),
+				},
+				CONNECT_DETAILS->user,
+				CONNECT_DETAILS->pass, self::getPdoOptions()
+			);
+		}
+
 
 		return static::$handle;
 	}
@@ -52,7 +58,7 @@ class Database
 		);
 	}
 	
-	private static function getSqlLite(
+	private static function getSqlite(
 	): string {
 		return sprintf( "sqlite:%s",
 			CONNECT_DETAILS->name
