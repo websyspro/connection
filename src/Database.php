@@ -23,7 +23,7 @@ class Database
 			return static::$handle;
 		}
 
-		if( CONNECT_DETAILS->driver !== DriverType::Sqlite ){
+		if( CONNECT_DETAILS->driver === DriverType::Sqlite ){
 			static::$handle = new PDO(
 				self::getSqlite()
 			);
