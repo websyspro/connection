@@ -6,6 +6,7 @@ use Websyspro\Connection\Enums\DriverType;
 use Websyspro\Utils\Collection;
 use PDOException;
 use PDOStatement;
+use Exception;
 use PDO;
 
 use function sprintf;
@@ -132,10 +133,8 @@ class Database
 			$statements->closeCursor();
 			return $fetchAll;
 		} catch( PDOException $pdoException ){
-			
-		}
-
-		return [];
+			return throw new Exception( $pdoException->getMessage() );
+		};
   }
 
 	public static function execute(
