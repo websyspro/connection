@@ -156,11 +156,20 @@ class Database
 			
 			return $rowCount;
 		} catch( PDOException $pdoException ){
-
+			return throw new Exception( $pdoException->getMessage() );
 		}
-
-		return 0;
 	}
+
+	public static function setExecute(
+		string $sql
+	): int {
+		try {
+			static::connect();
+			return static::$handle->exec( $sql );
+		} catch( PDOException $pdoException ){
+			return throw new Exception( $pdoException->getMessage() );
+		}
+	}	
 
 	public static function lastInsertId(
 	): string {

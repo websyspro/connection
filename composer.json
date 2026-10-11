@@ -1,6 +1,6 @@
 {
   "name": "websyspro/connection",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Connection to MySQL, PostgreSQL, and SQL Server databases",
   "minimum-stability": "dev",
   "prefer-stable": true,
