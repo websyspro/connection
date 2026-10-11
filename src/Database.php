@@ -172,7 +172,14 @@ class Database
 		} catch( PDOException $pdoException ){
 			return throw new Exception( $pdoException->getMessage() );
 		}
-	}	
+	}
+
+	public static function setIdentityInsert(
+		string $table, bool $onOff
+	): void {
+		$setIdentityInsert = sprintf( "Set Identity_Insert {$table} %s", $onOff ? "On" : "Off" );
+		static::set( $setIdentityInsert );
+	}
 
 	public static function lastInsertId(
 	): string {
