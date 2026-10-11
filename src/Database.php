@@ -24,15 +24,15 @@ class Database
 			return static::$handle;
 		}
 
-		if( CONNECT_DETAILS->driver === DriverType::Sqlite ){
+		if( static::driverIsSqLite() ){
 			static::$handle = new PDO(
-				self::getSqlite()
+				self::getSqLite()
 			);
 		} else {
 			static::$handle = new PDO(
 				match( CONNECT_DETAILS->driver ){
-					DriverType::PostgreSQL => self::getPostgresSQL(),
 					DriverType::SqlServer => self::getSqlServer(),
+					DriverType::Postgres => self::getPostgres(),
 					DriverType::MySql => self::getMySQL(),
 						default => self::getPdoException(),
 				},
@@ -52,14 +52,14 @@ class Database
 		);
 	}
 
-	private static function getPostgresSQL(
+	private static function getPostgres(
 	): string {
 		return sprintf( "pgsql:host=%s;port=%s;dbname=%s",
 			CONNECT_DETAILS->host, CONNECT_DETAILS->port, CONNECT_DETAILS->name
 		);
 	}
 	
-	private static function getSqlite(
+	private static function getSqLite(
 	): string {
 		return sprintf( "sqlite:%s",
 			CONNECT_DETAILS->name
