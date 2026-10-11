@@ -145,22 +145,25 @@ class Database
 		try {
 			static::connect();
 	
-			$statements = static::$handle->prepare($sql);
-			if( $statements instanceof PDOStatement ){
-				if( $statements->execute( $params )){
-					$rowCount = $statements->rowCount();
-				}
-				
-				$statements->closeCursor();
+			if( isset( static::$statements[$sql]) === false ){
+				static::$statements[ $sql ] = static::$handle->prepare( $sql );
+			}
+	
+			$statements = static::$statements[$sql];
+			if( $statements->execute( $params )){
+				$rowCount = $statements->rowCount();
 			}
 			
+			$statements->closeCursor();
 			return $rowCount;
 		} catch( PDOException $pdoException ){
-			return throw new Exception( $pdoException->getMessage() );
-		}
-	}
 
-	public static function setExecute(
+		}
+
+		return 0;
+	}	
+
+	public static function set(
 		string $sql
 	): int {
 		try {
