@@ -95,6 +95,25 @@ class Database
 		return CONNECT_DETAILS->driver;
 	}
 
+	public static function driverIsSqlServer(
+	): bool {
+		return static::driver() === DriverType::SqlServer;
+	}
+
+	public static function driverIsPostgres(
+	): bool {
+		return static::driver() === DriverType::Postgres;
+	}
+	
+	public static function driverIsSqLite(
+	): bool {
+		return static::driver() === DriverType::SqLite;
+	}
+	
+	public static function driverIsMySql(
+	): bool {
+		return static::driver() === DriverType::MySql;
+	}	
 
   public static function query(
 		string $sql,
