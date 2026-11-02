@@ -145,11 +145,13 @@ class Database
 				);
 			}
 
-			if( sizeof( static::$statements ) >= 2056 ){
+			$statements->closeCursor();
+			unset( $statements );
+
+			if( sizeof( static::$statements ) >= 256 ){
 				static::$statements = [];
 			}
 			
-			$statements->closeCursor();
 			return $fetchAll;
 		} catch( PDOException $pdoException ){
 			return throw new Exception( $pdoException->getMessage() );
