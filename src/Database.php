@@ -10,7 +10,6 @@ use Exception;
 use PDO;
 
 use function sprintf;
-use function defined;
 use function sizeof;
 
 class Database
@@ -30,14 +29,14 @@ class Database
 			);
 		} else {
 			static::$handle = new PDO(
-				match( CONNECT_DETAILS->driver ){
+				match( static::driver() ){
 					DriverType::SqlServer => self::getSqlServer(),
 					DriverType::Postgres => self::getPostgres(),
 					DriverType::MySql => self::getMySQL(),
 						default => self::getPdoException(),
 				},
-				CONNECT_DETAILS->user,
-				CONNECT_DETAILS->pass, self::getPdoOptions()
+				getenv( "USER" ),
+				getenv( "PASS" ), self::getPdoOptions()
 			);
 		}
 
@@ -48,35 +47,35 @@ class Database
 	private static function getMySQL(
 	): string {
 		return sprintf( "mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4",
-			CONNECT_DETAILS->host, CONNECT_DETAILS->port, CONNECT_DETAILS->name
+			getenv( "HOST" ), getenv( "PORT" ), getenv( "NAME" )
 		);
 	}
 
 	private static function getPostgres(
 	): string {
 		return sprintf( "pgsql:host=%s;port=%s;dbname=%s",
-			CONNECT_DETAILS->host, CONNECT_DETAILS->port, CONNECT_DETAILS->name
+			getenv( "HOST" ), getenv( "PORT" ), getenv( "NAME" )
 		);
 	}
 	
 	private static function getSqLite(
 	): string {
 		return sprintf( "sqlite:%s",
-			CONNECT_DETAILS->name
+			getenv( "NAME" )
 		);
 	}
 	
 	private static function getSqlServer(
 	): string {
 		return sprintf( "sqlsrv:Server=%s,%s;Database=%s;TrustServerCertificate=1",
-			CONNECT_DETAILS->host, CONNECT_DETAILS->port, CONNECT_DETAILS->name
+			getenv( "HOST" ), getenv( "PORT" ), getenv( "NAME" )
 		);
 	}
 
 	private static function getPdoException(
 	): PDOException {
 		return throw new PDOException(
-			sprintf( "Driver '%s' nao suportado", CONNECT_DETAILS->driver->name )
+			sprintf( "Driver '%s' nao suportado", getenv( "TYPE" ))
 		);
 	}
 
@@ -91,8 +90,12 @@ class Database
 
 	public static function driver(
 	): DriverType {
-		if( defined( "CONNECT_DETAILS" ) === false ){}
-		return CONNECT_DETAILS->driver;
+		return match( getenv( "TYPE" )){
+			"sqlserver" => DriverType::SqlServer,
+			"postgres" => DriverType::Postgres,
+			"sqlite" => DriverType::SqLite,
+			"mysql" => DriverType::MySql
+		};
 	}
 
 	public static function driverIsSqlServer(
